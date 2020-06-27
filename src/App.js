@@ -35,9 +35,28 @@ class App extends React.Component {
       imageUrl: '',
       box: {},
       route: 'signin',
-      isSignedIn: false
+      isSignedIn: false,
+      user: {
+        id: '',
+        name: '',
+        email: '',
+        entries: 0,
+        joined: ''
+      }
     };
   }
+
+  loadUser = (data) => {
+    this.setState({
+      user: {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        entries: data.entries,
+        joined: data.joined
+      }
+    });
+  };
 
   calculateFaceLocation = (data) => {
     const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
@@ -72,13 +91,13 @@ class App extends React.Component {
       .catch(err => console.log(err));
   };
 
-  onRouteChange = (route) => {
-    if (route === 'signout') {
+  onRouteChange = (data) => {
+    if (data === 'signout') {
       this.setState({ isSignedIn: false });
-    } else if (route === 'home') {
+    } else if (data === 'home') {
       this.setState({ isSignedIn: true });
     }
-    this.setState({ 'route': route });
+    this.setState({ 'route': data });
   };
 
   render() {
@@ -94,7 +113,9 @@ class App extends React.Component {
           ?
           <Fragment>
             <Logo />
-            <Rank />
+            <Rank
+              name={this.state.user.name}
+              entries={this.state.user.entries} />
             <ImageLinkForm
               onInputChange={this.onInputChange}
               onSubmit={this.onSubmit} />
@@ -105,8 +126,12 @@ class App extends React.Component {
           </Fragment>
 
           : (route === 'signin'
-            ? <SignIn onRouteChange={this.onRouteChange} />
-            : <Register onRouteChange={this.onRouteChange} />
+            ? <SignIn
+              loadUser={this.loadUser}
+              onRouteChange={this.onRouteChange} />
+            : <Register
+              loadUser={this.loadUser}
+              onRouteChange={this.onRouteChange} />
           )
         }
       </div>
